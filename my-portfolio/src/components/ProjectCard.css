@@ -1,0 +1,33 @@
+.project-card {
+  background: #0a1a2f; /* deep navy */
+  color: #c0c0c0; /* metallic silver */
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid #1f3b5b; /* subtle metallic border */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+  border-color: #9ecbff; /* silver-blue glow on hover */
+}
+
+.project-card h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.project-card p {
+  margin: 5px 0;
+}
+
+.project-card a {
+  color: #9ecbff;
+  text-decoration: none;
+}
+
+.project-card a:hover {
+  text-decoration: underline;
+}
