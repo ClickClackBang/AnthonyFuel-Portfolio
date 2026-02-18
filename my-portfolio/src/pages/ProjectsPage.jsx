@@ -18,12 +18,15 @@ const emptyForm = {
 
 function ProjectsPage() {
   const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(emptyForm);
   const [editingProject, setEditingProject] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [error, setError] = useState("");
 
+  /* ------------------------------
+     Load Projects on Mount
+  ------------------------------ */
   useEffect(() => {
     loadProjects();
   }, []);
@@ -31,20 +34,27 @@ function ProjectsPage() {
   async function loadProjects() {
     try {
       setLoading(true);
+      setError("");
       const data = await fetchProjects();
-      setProjects(data);
+      setProjects(data || []);
     } catch (err) {
-      setError("Failed to load projects");
+      setError(err.message || "Failed to load projects.");
     } finally {
       setLoading(false);
     }
   }
 
+  /* ------------------------------
+     Form Change Handler
+  ------------------------------ */
   function handleChange(e) {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   }
 
+  /* ------------------------------
+     Submit Handler (Create / Edit)
+  ------------------------------ */
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
@@ -55,19 +65,27 @@ function ProjectsPage() {
     }
 
     try {
+      setLoading(true);
+
       if (editingProject) {
         await updateProject(editingProject.id, formData);
       } else {
         await createProject(formData);
       }
+
       setFormData(emptyForm);
       setEditingProject(null);
       await loadProjects();
-    } catch {
-      setError("Something went wrong saving the project.");
+    } catch (err) {
+      setError(err.message || "Something went wrong saving the project.");
+    } finally {
+      setLoading(false);
     }
   }
 
+  /* ------------------------------
+     Edit Handler
+  ------------------------------ */
   function handleEdit(project) {
     setEditingProject(project);
     setFormData({
@@ -76,21 +94,31 @@ function ProjectsPage() {
       techStack: project.techStack,
       link: project.link || "",
     });
+    setError("");
   }
 
+  /* ------------------------------
+     Cancel Edit
+  ------------------------------ */
   function handleCancelEdit() {
     setEditingProject(null);
     setFormData(emptyForm);
     setError("");
   }
 
+  /* ------------------------------
+     Confirm Delete
+  ------------------------------ */
   async function handleConfirmDelete(project) {
     try {
+      setLoading(true);
       await deleteProject(project.id);
       setDeleteTarget(null);
       await loadProjects();
-    } catch {
-      setError("Failed to delete project.");
+    } catch (err) {
+      setError(err.message || "Failed to delete project.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -100,104 +128,107 @@ function ProjectsPage() {
 
       <div className="projects-layout">
 
-  {/* PROJECT CARDS GRID */}
-  <section className="projects-list-section">
-    {loading ? (
-      <p className="status-text">Loading projects...</p>
-    ) : projects.length === 0 ? (
-      <p className="status-text">No projects yet. Add your first one!</p>
-    ) : (
-      <div className="projects-grid">
-        {projects.map((project) => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            onEdit={handleEdit}
-            onDelete={setDeleteTarget}
-          />
-        ))}
+        {/* PROJECT LIST */}
+        <section className="projects-list-section">
+          {loading ? (
+            <p className="status-text">Loading projects...</p>
+          ) : projects.length === 0 ? (
+            <p className="status-text">No projects yet. Add your first one!</p>
+          ) : (
+            <div className="projects-grid">
+              {projects.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  onEdit={() => handleEdit(project)}
+                  onDelete={() => setDeleteTarget(project)}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* FORM SECTION */}
+        <section className="projects-form-section">
+          <h3 className="form-title">
+            {editingProject ? "Edit Project" : "Add New Project"}
+          </h3>
+
+          {error && <p className="form-error">{error}</p>}
+
+          <form className="project-form" onSubmit={handleSubmit}>
+            <label>
+              Title
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                placeholder="Project title"
+              />
+            </label>
+
+            <label>
+              Description
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Short description of the project"
+                rows={3}
+              />
+            </label>
+
+            <label>
+              Tech Stack
+              <input
+                type="text"
+                name="techStack"
+                value={formData.techStack}
+                onChange={handleChange}
+                placeholder="React, Node, Prisma, etc."
+              />
+            </label>
+
+            <label>
+              GitHub Link (optional)
+              <input
+                type="url"
+                name="link"
+                value={formData.link}
+                onChange={handleChange}
+                placeholder="https://github.com/ClickClackBang/..."
+              />
+            </label>
+
+            <div className="form-actions">
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {editingProject ? "Save Changes" : "Create Project"}
+              </button>
+
+              {editingProject && (
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleCancelEdit}
+                  disabled={loading}
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </form>
+        </section>
       </div>
-    )}
-  </section>
 
-  {/* ADD / EDIT FORM BELOW */}
-  <section className="projects-form-section">
-    <h3 className="form-title">
-      {editingProject ? "Edit Project" : "Add New Project"}
-    </h3>
-
-    {error && <p className="form-error">{error}</p>}
-
-    <form className="project-form" onSubmit={handleSubmit}>
-      <label>
-        Title
-        <input
-          type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-          placeholder="Project title"
+      {/* DELETE MODAL */}
+      {deleteTarget && (
+        <DeleteModal
+          project={deleteTarget}
+          onConfirm={() => handleConfirmDelete(deleteTarget)}
+          onCancel={() => setDeleteTarget(null)}
         />
-      </label>
-
-      <label>
-        Description
-        <textarea
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          placeholder="Short description of the project"
-          rows={3}
-        />
-      </label>
-
-      <label>
-        Tech Stack
-        <input
-          type="text"
-          name="techStack"
-          value={formData.techStack}
-          onChange={handleChange}
-          placeholder="React, Node, Prisma, etc."
-        />
-      </label>
-
-      <label>
-        GitHub Link (optional)
-        <input
-          type="url"
-          name="link"
-          value={formData.link}
-          onChange={handleChange}
-          placeholder="https://github.com/ClickClackBang/..."
-        />
-      </label>
-
-      <div className="form-actions">
-        <button type="submit" className="btn btn-primary">
-          {editingProject ? "Save Changes" : "Create Project"}
-        </button>
-
-        {editingProject && (
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={handleCancelEdit}
-          >
-            Cancel
-          </button>
-        )}
-      </div>
-    </form>
-  </section>
-
-</div>
-
-      <DeleteModal
-        project={deleteTarget}
-        onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteTarget(null)}
-      />
+      )}
     </div>
   );
 }

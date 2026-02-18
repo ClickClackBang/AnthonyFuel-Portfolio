@@ -1,0 +1,90 @@
+.home-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding-top: 2rem;
+  text-align: center;
+}
+
+/* Profile Section */
+.profile-section {
+  margin-top: 1rem;
+}
+
+.profile-picture {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-color: #ddd;
+  margin: 0 auto;
+}
+
+.profile-label {
+  margin-top: 0.5rem;
+  color: #d1d5db;
+}
+
+/* About Me Box */
+.about-box {
+  width: 100%;
+  max-width: 700px;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 12px;
+  background: radial-gradient(circle at top left, #111827, #020617);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.9);
+}
+
+.about-title {
+  margin-bottom: 10px;
+  color: #f9fafb;
+  font-size: 1.6rem;
+}
+
+.about-text {
+  margin: 6px 0;
+  color: #d1d5db;
+  font-size: 0.95rem;
+}
+
+/* Buttons Section */
+.home-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.home-primary-button,
+.home-secondary-button {
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+}
+
+/* View Projects Button */
+.home-primary-button {
+  background: linear-gradient(135deg, #1f2937, #4b5563);
+  color: #f9fafb;
+  box-shadow: 0 0 14px rgba(148, 163, 184, 0.8);
+}
+
+.home-primary-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 18px rgba(209, 213, 219, 0.9);
+}
+
+/* Download Resume Button */
+.home-secondary-button {
+  border: 1px solid #9ca3af;
+  color: #e5e7eb;
+  background: linear-gradient(135deg, #020617, #111827);
+}
+
+.home-secondary-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 14px rgba(148, 163, 184, 0.8);
+}

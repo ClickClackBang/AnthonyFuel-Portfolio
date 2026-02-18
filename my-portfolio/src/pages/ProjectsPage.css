@@ -3,7 +3,7 @@
   padding: 40px;
   background: linear-gradient(to bottom right, #0a1a2f, #0f2742);
   min-height: 100vh;
-  color: #c0c0c0; /* metallic silver */
+  color: #c0c0c0;
 }
 
 /* Title */
@@ -20,28 +20,28 @@
   gap: 40px;
 }
 
-/* Left side: project list */
+/* Project list section */
 .projects-list-section {
   background: rgba(255, 255, 255, 0.03);
   padding: 20px;
   border-radius: 12px;
 }
 
-/* Right side: form */
+/* Form section */
 .projects-form-section {
   background: rgba(255, 255, 255, 0.05);
   padding: 20px;
   border-radius: 12px;
 }
 
-/* Status text (loading, empty, errors) */
+/* Status text */
 .status-text {
   text-align: center;
   color: #c0c0c0;
   font-size: 1.1rem;
 }
 
-/* ⭐ The grid that fixes your card layout */
+/* Grid layout */
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
