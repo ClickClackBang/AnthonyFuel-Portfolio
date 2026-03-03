@@ -1,4 +1,5 @@
 import React from "react";
+import "./DeleteModal.css";
 
 function DeleteModal({ project, onConfirm, onCancel }) {
   if (!project) return null;

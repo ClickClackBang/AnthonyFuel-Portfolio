@@ -1,20 +1,70 @@
-/* Reset browser defaults */
-body {
-  margin: 0;
-  padding: 0;
-  background-color: #020617; /* deep navy */
-  color: #e5e7eb; /* metallic silver */
-  font-family: sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Oxanium:wght@300;400;500;600&display=swap');
+
+/* ─── CSS Variables ─────────────────────────────────────── */
+:root {
+  --bg:           #04070f;
+  --bg-surface:   #080e1c;
+  --bg-raised:    #0d1526;
+  --border:       rgba(99, 210, 219, 0.12);
+  --border-glow:  rgba(99, 210, 219, 0.35);
+  --accent:       #63d2db;
+  --accent-dim:   rgba(99, 210, 219, 0.15);
+  --accent-glow:  0 0 24px rgba(99, 210, 219, 0.25);
+  --text-primary: #e8edf5;
+  --text-muted:   #6b7fa3;
+  --text-faint:   #3a4a66;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-mono:    'DM Mono', 'Courier New', monospace;
+  --font-body:    'Oxanium', system-ui, sans-serif;
+  --text-body:    #c8d0e0;
+  --radius:       6px;
+  --transition:   0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* React root container */
+/* ─── Reset ─────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─── Base ───────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+
+  /* Subtle noise grain overlay */
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(99, 210, 219, 0.06) 0%, transparent 70%);
+}
+
+/* Animated background grain */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+/* ─── React Root ─────────────────────────────────────────── */
 #root {
   width: 100%;
-  margin: 0;
-  padding: 0;
+  position: relative;
+  z-index: 1;
 }
 
-/* App layout */
+/* ─── App Layout ─────────────────────────────────────────── */
 .app-root {
   min-height: 100vh;
   display: flex;
@@ -23,5 +73,70 @@ body {
 
 .app-main {
   flex: 1;
-  padding: 2rem;
+  padding: 2.5rem 2rem;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--text-faint);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* ─── Selection ──────────────────────────────────────────── */
+::selection {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+/* ─── Shared Utilities ───────────────────────────────────── */
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.display-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  line-height: 1.1;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.card:hover {
+  border-color: var(--border-glow);
+  box-shadow: var(--accent-glow);
+}
+
+/* ─── Page Entry Animation ───────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.app-main > * {
+  animation: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
 }

@@ -1,33 +1,124 @@
+/* ─── Card Shell ─────────────────────────────────────────── */
 .project-card {
-  background: #0a1a2f; /* deep navy */
-  color: #c0c0c0; /* metallic silver */
-  padding: 20px;
-  border-radius: 12px;
-  border: 2px solid #1f3b5b; /* subtle metallic border */
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Top-left corner glow */
+.project-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 120px; height: 80px;
+  background: radial-gradient(ellipse at top left, rgba(99, 210, 219, 0.07), transparent 70%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition);
 }
 
 .project-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
-  border-color: #9ecbff; /* silver-blue glow on hover */
+  border-color: var(--border-glow);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), var(--accent-glow);
+  transform: translateY(-3px);
 }
 
-.project-card h3 {
-  margin-top: 0;
-  margin-bottom: 10px;
+.project-card:hover::before {
+  opacity: 1;
 }
 
-.project-card p {
-  margin: 5px 0;
+/* ─── Title ──────────────────────────────────────────────── */
+.project-card-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  margin: 0;
 }
 
-.project-card a {
-  color: #9ecbff;
-  text-decoration: none;
+/* ─── Description ────────────────────────────────────────── */
+.project-card-description {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.75;
+  color: var(--text-muted);
+  flex: 1;
+  margin: 0;
 }
 
-.project-card a:hover {
-  text-decoration: underline;
+/* ─── Tech Stack ─────────────────────────────────────────── */
+.project-card-tech {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  margin: 0;
+  letter-spacing: 0.03em;
+}
+
+.project-card-tech-label {
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.65rem;
+}
+
+/* ─── Card Actions ───────────────────────────────────────── */
+.project-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border);
+}
+
+/* GitHub link button */
+.btn-github {
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--border-glow);
+  flex: 1;
+  justify-content: center;
+}
+
+.btn-github:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  box-shadow: var(--accent-glow);
+  transform: translateY(-1px);
+}
+
+/* Edit button */
+.btn-edit {
+  background: transparent;
+  color: var(--text-muted);
+  border-color: var(--border);
+}
+
+.btn-edit:hover {
+  color: var(--text-primary);
+  border-color: var(--border-glow);
+  background: var(--bg-surface);
+}
+
+/* Delete button */
+.btn-delete {
+  background: transparent;
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.2);
+}
+
+.btn-delete:hover {
+  background: rgba(248, 113, 113, 0.08);
+  border-color: rgba(248, 113, 113, 0.4);
+  box-shadow: 0 0 12px rgba(248, 113, 113, 0.15);
 }
