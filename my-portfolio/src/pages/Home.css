@@ -14,7 +14,8 @@
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background-color: #ddd;
+  object-fit: cover;
+  border: 2px solid #9ca3af;
   margin: 0 auto;
 }
 
@@ -45,6 +46,41 @@
   margin: 6px 0;
   color: #d1d5db;
   font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Two Column Section */
+.two-column-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 900px;
+  margin: 20px auto;
+}
+
+.left-box,
+.right-box {
+  flex: 1;
+}
+
+/* Experience Section */
+.experience-section {
+  margin-top: 10px;
+}
+
+.experience-role {
+  font-size: 1.05rem;
+  font-weight: bold;
+  color: #f3f4f6;
+  margin-top: 12px;
+}
+
+.experience-dates {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin-bottom: 6px;
 }
 
 /* Buttons Section */
@@ -87,4 +123,11 @@
 .home-secondary-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 0 14px rgba(148, 163, 184, 0.8);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .two-column-section {
+    flex-direction: column;
+  }
 }
