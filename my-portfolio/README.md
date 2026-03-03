@@ -1,80 +1,147 @@
-# React + Vite
+# Anthony Fuel Ramos — Developer Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack personal portfolio application built to showcase projects, professional experience, and technical skills. Features a custom dark editorial UI with a futuristic aesthetic, live animated terminal widget, and full project CRUD functionality backed by a REST API.
 
-Currently, two official plugins are available:
+**Live Site:** [your-vercel-url.vercel.app](#) ← replace with your URL
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-
-
-## Week 4 added
-
-This project is a full‑stack personal portfolio application built with React, Express, Prisma, and SQLite.
-The Week 4 milestone focuses on implementing a complete Projects CRUD feature that works end‑to‑end across the frontend, backend, and database.
-
-TECH STACK
-Frontend:
+**Frontend**
 - React (Vite)
 - React Router
-- Custom UI with deep navy + metallic silver theme
-- Project cards with edit/delete actions
-- Form for creating and updating projects
-Backend:
+- Custom CSS design system — DM Serif Display, DM Mono, Oxanium fonts
+- Animated terminal widget (no external dependencies)
+
+**Backend**
 - Node.js + Express
 - REST API with full CRUD support
 - Input validation and error handling
-Database:
+
+**Database**
+- PostgreSQL (production via Render)
 - SQLite (local development)
 - Prisma ORM
-- Prisma Studio for database visualization
 
-PROJECT STRUCTURE
-my-portfolio/ backend/ prisma/ schema.prisma dev.db migrations/ server.js package.json .env
-src/ api/ projectsApi.js components/ ProjectCard.jsx ProjectCard.css DeleteModal.jsx pages/ Home.jsx ProjectsPage.jsx ProjectsPage.css App.jsx main.jsx
-README.md
+---
 
-PRISMA SCHEMA
-model Project { 
-    id          Int      @id @default(autoincrement()) 
-    title       String 
-    description String 
-    techStack   String 
-    link        String? 
-    createdAt   DateTime @default(now()) 
-    updatedAt   DateTime @updatedAt
-    }
+## Project Structure
 
-API ENDPOINTS (CRUD)
-GET /projects
-Returns all projects.
-POST /projects
-Creates a new project.
-Required fields: title, description, techStack.
-PUT /projects/:id
-Updates an existing project.
-DELETE /projects/:id
-Deletes a project by ID.
+```
+my-portfolio/
+├── backend/
+│   ├── prisma/
+│   │   ├── schema.prisma
+│   │   └── migrations/
+│   ├── server.js
+│   ├── package.json
+│   └── .env
+└── src/
+    ├── api/
+    │   └── projectsApi.js
+    ├── assets/
+    │   └── profile.jpg
+    ├── components/
+    │   ├── Header.jsx / Header.css
+    │   ├── Footer.jsx / Footer.css
+    │   ├── ProjectCard.jsx / ProjectCard.css
+    │   ├── DeleteModal.jsx / DeleteModal.css
+    │   └── TerminalWidget.jsx / TerminalWidget.css
+    ├── pages/
+    │   ├── Home.jsx / Home.css
+    │   └── ProjectsPage.jsx / ProjectsPage.css
+    ├── App.jsx
+    ├── App.css
+    └── main.jsx
+```
 
-HOW TO RUN THE BACKEND
+---
+
+## Prisma Schema
+
+```prisma
+model Project {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  techStack   String
+  link        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+```
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/projects` | Returns all projects |
+| POST | `/projects` | Creates a new project (requires `title`, `description`, `techStack`) |
+| PUT | `/projects/:id` | Updates an existing project by ID |
+| DELETE | `/projects/:id` | Deletes a project by ID |
+
+---
+
+## Running Locally
+
+### Backend
+```bash
 cd backend
 npm install
 npx prisma migrate dev
 node server.js
-Backend runs at:
-http://localhost:4000
+# Runs at http://localhost:4000
+```
 
-HOW TO RUN THE FRONTEND
+### Frontend
+```bash
 cd my-portfolio
 npm install
 npm run dev
-Frontend runs at:
-http://localhost:5173
+# Runs at http://localhost:5173
+```
+
+### Environment Variables
+
+Create a `.env` file inside the `backend/` folder:
+
+```
+DATABASE_URL="file:./dev.db"   # SQLite for local development
+PORT=4000
+```
+
+> Never commit your `.env` file. It is listed in `.gitignore`.
+
+---
+
+## Deployment
+
+| Layer | Platform |
+|-------|----------|
+| Frontend | Vercel |
+| Backend | Render |
+| Database | Render PostgreSQL |
+
+**Frontend (Vercel)**
+- Import the GitHub repo
+- Set environment variable: `VITE_API_URL` = your Render backend URL
+- Vercel auto-deploys on every push to `main`
+
+**Backend (Render)**
+- New Web Service → connect GitHub repo
+- Root Directory: `backend`
+- Build Command: `npm install && npx prisma generate`
+- Start Command: `node server.js`
+- Set environment variables: `DATABASE_URL`, `NODE_ENV=production`
+
+---
+
+## Features
+
+- **Home page** — Profile, about, career goal, professional experience, and an animated terminal cycling through real tech stack commands
+- **Projects page** — Full CRUD: create, view, edit, and delete projects with a confirmation modal
+- **Responsive design** — Mobile-friendly layouts across all pages
+- **Consistent design system** — Shared CSS variables, typography, spacing, and animation across all components
