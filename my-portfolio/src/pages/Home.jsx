@@ -1,6 +1,7 @@
 import "./Home.css";
 import profilePic from "../assets/profile.jpg";
 import TerminalWidget from "../components/TerminalWidget";
+import { Link } from "react-router-dom";
 
 export default function Home() {
   const resumePath = "/resume/Fuel-Anthony-BSSE.pdf";
@@ -68,7 +69,7 @@ export default function Home() {
 
       {/* Buttons */}
       <div className="home-actions">
-        <a href="/projects" className="home-primary-button">View Projects</a>
+        <Link to="/projects" className="home-primary-button">View Projects</Link>
         <a href={resumePath} download className="home-secondary-button">Download Resume</a>
       </div>
 
