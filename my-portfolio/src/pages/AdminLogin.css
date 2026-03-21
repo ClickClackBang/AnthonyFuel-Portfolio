@@ -1,0 +1,147 @@
+/* ─── Page ───────────────────────────────────────────────── */
+.admin-login-page {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+/* ─── Card ───────────────────────────────────────────────── */
+.admin-login-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) * 1.5);
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+  animation: fadeUp 0.4s both;
+}
+
+/* ─── Shake Animation ────────────────────────────────────── */
+@keyframes shakeAnim {
+  0%,100% { transform: translateX(0); }
+  20%     { transform: translateX(-8px); }
+  40%     { transform: translateX(8px); }
+  60%     { transform: translateX(-5px); }
+  80%     { transform: translateX(5px); }
+}
+
+.admin-login-card.shake {
+  animation: shakeAnim 0.5s ease;
+}
+
+/* ─── Icon ───────────────────────────────────────────────── */
+.admin-login-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-glow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  box-shadow: 0 0 20px rgba(99, 210, 219, 0.12);
+}
+
+/* ─── Title ──────────────────────────────────────────────── */
+.admin-login-title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.admin-login-subtitle {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  margin: 0 0 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+/* ─── Error ──────────────────────────────────────────────── */
+.admin-login-error {
+  font-family: var(--font-mono);
+  font-size: 0.73rem;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: var(--radius);
+  padding: 0.45rem 0.85rem;
+  width: 100%;
+  text-align: center;
+  margin: 0;
+}
+
+/* ─── Form ───────────────────────────────────────────────── */
+.admin-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+.admin-login-input {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  box-sizing: border-box;
+}
+
+.admin-login-input::placeholder {
+  color: var(--text-faint);
+  letter-spacing: 0.04em;
+}
+
+.admin-login-input:focus {
+  outline: none;
+  border-color: var(--border-glow);
+  box-shadow: 0 0 0 3px rgba(99, 210, 219, 0.08);
+}
+
+/* ─── Submit Button ──────────────────────────────────────── */
+.admin-login-btn {
+  width: 100%;
+  padding: 0.65rem;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--transition), box-shadow var(--transition),
+              transform var(--transition), opacity var(--transition);
+}
+
+.admin-login-btn:hover:not(:disabled) {
+  background: #7fe0e8;
+  box-shadow: 0 0 24px rgba(99, 210, 219, 0.4);
+  transform: translateY(-1px);
+}
+
+.admin-login-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

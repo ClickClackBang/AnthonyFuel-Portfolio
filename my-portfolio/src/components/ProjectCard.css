@@ -3,13 +3,19 @@
   background: var(--bg-raised);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.4rem 1.5rem;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
   transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
   position: relative;
   overflow: hidden;
+  cursor: pointer;
+  animation: cardReveal 0.4s both;
+}
+
+@keyframes cardReveal {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* Top-left corner glow */
@@ -17,21 +23,77 @@
   content: '';
   position: absolute;
   top: 0; left: 0;
-  width: 120px; height: 80px;
-  background: radial-gradient(ellipse at top left, rgba(99, 210, 219, 0.07), transparent 70%);
+  width: 150px; height: 100px;
+  background: radial-gradient(ellipse at top left, rgba(99, 210, 219, 0.1), transparent 70%);
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--transition);
 }
 
-.project-card:hover {
-  border-color: var(--border-glow);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), var(--accent-glow);
-  transform: translateY(-3px);
+/* Bottom-right accent line */
+.project-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.project-card:hover::before {
+.project-card:hover {
+  border-color: var(--border-glow);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), var(--accent-glow);
+  transform: translateY(-4px);
+}
+
+.project-card:hover::before { opacity: 1; }
+.project-card:hover::after  { transform: scaleX(1); }
+
+.project-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ─── Inner Padding ──────────────────────────────────────── */
+.project-card-inner {
+  padding: 1.4rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  height: 100%;
+}
+
+/* ─── Top Row ────────────────────────────────────────────── */
+.project-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.15rem;
+}
+
+.project-card-index {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  opacity: 0.7;
+}
+
+.project-card-expand-hint {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-faint);
+  letter-spacing: 0.08em;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.25s, transform 0.25s;
+}
+
+.project-card:hover .project-card-expand-hint {
   opacity: 1;
+  transform: translateX(0);
 }
 
 /* ─── Title ──────────────────────────────────────────────── */
@@ -42,6 +104,11 @@
   color: var(--text-primary);
   letter-spacing: -0.01em;
   margin: 0;
+  transition: color var(--transition);
+}
+
+.project-card:hover .project-card-title {
+  color: var(--accent);
 }
 
 /* ─── Description ────────────────────────────────────────── */
@@ -52,73 +119,70 @@
   color: var(--text-muted);
   flex: 1;
   margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-/* ─── Tech Stack ─────────────────────────────────────────── */
-.project-card-tech {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--text-faint);
-  margin: 0;
-  letter-spacing: 0.03em;
-}
-
-.project-card-tech-label {
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 0.65rem;
-}
-
-/* ─── Card Actions ───────────────────────────────────────── */
-.project-card-actions {
+/* ─── Footer ─────────────────────────────────────────────── */
+.project-card-footer {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
-  flex-wrap: wrap;
   margin-top: 0.5rem;
   padding-top: 0.85rem;
   border-top: 1px solid var(--border);
 }
 
-/* GitHub link button */
-.btn-github {
-  background: transparent;
-  color: var(--accent);
-  border-color: var(--border-glow);
+/* ─── Tech Tags ──────────────────────────────────────────── */
+.project-card-tech-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
   flex: 1;
-  justify-content: center;
 }
 
-.btn-github:hover {
-  background: var(--accent-dim);
-  border-color: var(--accent);
-  box-shadow: var(--accent-glow);
-  transform: translateY(-1px);
-}
-
-/* Edit button */
-.btn-edit {
-  background: transparent;
-  color: var(--text-muted);
-  border-color: var(--border);
-}
-
-.btn-edit:hover {
-  color: var(--text-primary);
-  border-color: var(--border-glow);
+.tech-tag {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
   background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.18rem 0.5rem;
+  transition: color var(--transition), border-color var(--transition);
 }
 
-/* Delete button */
-.btn-delete {
-  background: transparent;
-  color: #f87171;
-  border-color: rgba(248, 113, 113, 0.2);
+.project-card:hover .tech-tag {
+  color: var(--accent);
+  border-color: rgba(99, 210, 219, 0.25);
 }
 
-.btn-delete:hover {
-  background: rgba(248, 113, 113, 0.08);
-  border-color: rgba(248, 113, 113, 0.4);
-  box-shadow: 0 0 12px rgba(248, 113, 113, 0.15);
+.tech-tag-more {
+  color: var(--accent);
+  border-color: rgba(99, 210, 219, 0.2);
+}
+
+/* ─── GitHub Icon Link ───────────────────────────────────── */
+.project-card-github {
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+  transition: color var(--transition), border-color var(--transition), background var(--transition);
+}
+
+.project-card-github:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-dim);
 }

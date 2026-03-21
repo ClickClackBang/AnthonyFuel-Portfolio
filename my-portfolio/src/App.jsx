@@ -4,6 +4,7 @@ import "./App.css";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import AdminPage from "./pages/AdminPage";
 
 import ProjectsPage from "./pages/ProjectsPage";
 import Home from "./pages/Home";
@@ -18,6 +19,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/admin" element={<AdminPage />} />
           </Routes>
         </main>
 
