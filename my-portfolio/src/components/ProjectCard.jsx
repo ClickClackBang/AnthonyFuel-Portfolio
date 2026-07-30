@@ -1,19 +1,95 @@
-import React from "react";
+import React, { useRef, useEffect, useState } from "react";
 import "./ProjectCard.css";
 
-function ProjectCard({ project, onClick }) {
+function ProjectCard({ project, onClick, isPlaying }) {
+  const imgRef = useRef(null);
+  const [gifLoaded, setGifLoaded] = useState(false);
+
   const techItems = project.techStack
     ? project.techStack.split(",").map((t) => t.trim())
     : [];
 
+  // Swap between static and animated GIF src to control autoplay
+  const staticSrc = project.imageUrl || null;
+  const gifSrc = project.gifUrl || null;
+
+  useEffect(() => {
+    if (!imgRef.current || !gifSrc) return;
+    if (isPlaying) {
+      imgRef.current.src = gifSrc + "?t=" + Date.now(); // force gif restart
+    } else {
+      // Pause by switching to static screenshot or reloading to first frame
+      if (staticSrc) {
+        imgRef.current.src = staticSrc;
+      } else {
+        // No static — clone trick to freeze GIF
+        imgRef.current.src = "";
+        setTimeout(() => {
+          if (imgRef.current) imgRef.current.src = gifSrc;
+        }, 0);
+      }
+    }
+  }, [isPlaying, gifSrc, staticSrc]);
+
+  function renderMedia() {
+    if (gifSrc) {
+      return (
+        <div className="card-media-wrapper">
+          <img
+            ref={imgRef}
+            className={`card-media-gif ${isPlaying ? "playing" : "paused"}`}
+            src={isPlaying ? gifSrc : (staticSrc || gifSrc)}
+            alt={`${project.title} preview`}
+            onLoad={() => setGifLoaded(true)}
+          />
+          {!isPlaying && (
+            <div className="card-media-overlay">
+              <span className="card-media-play-hint">▶</span>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (project.imageUrl) {
+      return (
+        <div className="card-media-wrapper">
+          <img
+            className="card-media-gif"
+            src={project.imageUrl}
+            alt={`${project.title} screenshot`}
+          />
+        </div>
+      );
+    }
+
+    return null;
+  }
+
   return (
-    <div className="project-card" onClick={onClick} role="button" tabIndex={0}
-      onKeyDown={(e) => e.key === "Enter" && onClick()}>
+    <div
+      className={`project-card ${project.featured ? "project-card--featured" : ""} ${isPlaying ? "project-card--playing" : ""}`}
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === "Enter" && onClick()}
+    >
+      {/* Featured ribbon */}
+      {project.featured && (
+        <div className="card-ribbon">
+          <span>Featured</span>
+        </div>
+      )}
+
+      {/* Media preview */}
+      {renderMedia()}
+
       <div className="project-card-inner">
         <div className="project-card-top">
           <span className="project-card-index">
             {String(project.id).padStart(2, "0")}
           </span>
+          {project.pinned && <span className="card-pinned-badge">📌 Pinned</span>}
           <span className="project-card-expand-hint">click to explore →</span>
         </div>
 

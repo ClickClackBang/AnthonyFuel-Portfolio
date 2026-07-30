@@ -13,30 +13,26 @@ const emptyForm = {
   demoUrl: "",
   gifUrl: "",
   imageUrl: "",
+  featured: false,
+  pinned: false,
 };
 
 function AdminPage() {
   const [token, setToken] = useState(
     () => sessionStorage.getItem("admin_token") || null
   );
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState(emptyForm);
+  const [projects, setProjects]         = useState([]);
+  const [loading, setLoading]           = useState(false);
+  const [formData, setFormData]         = useState(emptyForm);
   const [editingProject, setEditingProject] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [error, setError]               = useState("");
+  const [success, setSuccess]           = useState("");
 
-  useEffect(() => {
-    if (token) loadProjects();
-  }, [token]);
+  useEffect(() => { if (token) loadProjects(); }, [token]);
 
-  // ─── Auth helpers ────────────────────────────────────────
   function authHeaders() {
-    return {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    };
+    return { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
   }
 
   function handleLogout() {
@@ -44,37 +40,37 @@ function AdminPage() {
     setToken(null);
   }
 
-  // ─── Load ────────────────────────────────────────────────
   async function loadProjects() {
     try {
       setLoading(true);
       setError("");
-      const res = await fetch(`${API_URL}/api/projects`);
+      const res  = await fetch(`${API_URL}/api/projects`);
       const data = await res.json();
       setProjects(data || []);
-    } catch (err) {
+    } catch {
       setError("Failed to load projects.");
     } finally {
       setLoading(false);
     }
   }
 
-  // ─── Form ────────────────────────────────────────────────
   function handleChange(e) {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   }
 
   function handleEdit(project) {
     setEditingProject(project);
     setFormData({
-      title: project.title || "",
+      title:       project.title       || "",
       description: project.description || "",
-      techStack: project.techStack || "",
-      link: project.link || "",
-      demoUrl: project.demoUrl || "",
-      gifUrl: project.gifUrl || "",
-      imageUrl: project.imageUrl || "",
+      techStack:   project.techStack   || "",
+      link:        project.link        || "",
+      demoUrl:     project.demoUrl     || "",
+      gifUrl:      project.gifUrl      || "",
+      imageUrl:    project.imageUrl    || "",
+      featured:    project.featured    || false,
+      pinned:      project.pinned      || false,
     });
     setError("");
     setSuccess("");
@@ -99,7 +95,7 @@ function AdminPage() {
 
     try {
       setLoading(true);
-      const url = editingProject
+      const url    = editingProject
         ? `${API_URL}/api/projects/${editingProject.id}`
         : `${API_URL}/api/projects`;
       const method = editingProject ? "PUT" : "POST";
@@ -127,14 +123,13 @@ function AdminPage() {
       setEditingProject(null);
       await loadProjects();
       setTimeout(() => setSuccess(""), 3000);
-    } catch (err) {
+    } catch {
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
-  // ─── Delete ──────────────────────────────────────────────
   async function handleConfirmDelete(project) {
     try {
       setLoading(true);
@@ -144,7 +139,7 @@ function AdminPage() {
       });
 
       if (res.status === 401 || res.status === 403) {
-        setError("Session expired. Please log in again.");
+        setError("Session expired.");
         handleLogout();
         return;
       }
@@ -160,12 +155,23 @@ function AdminPage() {
     }
   }
 
-  // ─── Gate ────────────────────────────────────────────────
-  if (!token) {
-    return <AdminLogin onSuccess={(t) => setToken(t)} />;
+  // Quick-toggle featured or pinned from the list without opening edit form
+  async function handleQuickToggle(project, field) {
+    try {
+      const updated = { ...project, [field]: !project[field] };
+      await fetch(`${API_URL}/api/projects/${project.id}`, {
+        method: "PUT",
+        headers: authHeaders(),
+        body: JSON.stringify(updated),
+      });
+      await loadProjects();
+    } catch {
+      setError("Failed to update project.");
+    }
   }
 
-  // ─── Admin Panel ─────────────────────────────────────────
+  if (!token) return <AdminLogin onSuccess={(t) => setToken(t)} />;
+
   return (
     <div className="admin-page">
       <div className="admin-header">
@@ -173,9 +179,7 @@ function AdminPage() {
           <span className="admin-badge">Admin</span>
           <h2 className="admin-title">Project Manager</h2>
         </div>
-        <button className="admin-logout-btn" onClick={handleLogout}>
-          Log Out
-        </button>
+        <button className="admin-logout-btn" onClick={handleLogout}>Log Out</button>
       </div>
 
       <div className="admin-layout">
@@ -193,15 +197,13 @@ function AdminPage() {
             <div className="admin-field-group">
               <label className="admin-label">Title *</label>
               <input className="admin-input" type="text" name="title"
-                value={formData.title} onChange={handleChange}
-                placeholder="Project title" />
+                value={formData.title} onChange={handleChange} placeholder="Project title" />
             </div>
 
             <div className="admin-field-group">
               <label className="admin-label">Description *</label>
-              <textarea className="admin-input admin-textarea"
-                name="description" value={formData.description}
-                onChange={handleChange} rows={3}
+              <textarea className="admin-input admin-textarea" name="description"
+                value={formData.description} onChange={handleChange} rows={3}
                 placeholder="Short description of the project" />
             </div>
 
@@ -219,7 +221,6 @@ function AdminPage() {
                   value={formData.link} onChange={handleChange}
                   placeholder="https://github.com/..." />
               </div>
-
               <div className="admin-field-group">
                 <label className="admin-label">Live Demo URL</label>
                 <input className="admin-input" type="url" name="demoUrl"
@@ -235,13 +236,37 @@ function AdminPage() {
                   value={formData.gifUrl} onChange={handleChange}
                   placeholder="/demos/myapp.gif or full URL" />
               </div>
-
               <div className="admin-field-group">
                 <label className="admin-label">Screenshot URL</label>
                 <input className="admin-input" type="text" name="imageUrl"
                   value={formData.imageUrl} onChange={handleChange}
                   placeholder="/images/myapp.png or full URL" />
               </div>
+            </div>
+
+            {/* ── Featured & Pinned toggles ── */}
+            <div className="admin-toggles">
+              <label className="admin-toggle-label">
+                <div className={`admin-toggle ${formData.featured ? "on" : ""}`}
+                  onClick={() => setFormData(p => ({ ...p, featured: !p.featured }))}>
+                  <span className="admin-toggle-knob" />
+                </div>
+                <div>
+                  <span className="admin-toggle-name">Featured</span>
+                  <span className="admin-toggle-desc">Shows corner ribbon on card</span>
+                </div>
+              </label>
+
+              <label className="admin-toggle-label">
+                <div className={`admin-toggle ${formData.pinned ? "on" : ""}`}
+                  onClick={() => setFormData(p => ({ ...p, pinned: !p.pinned }))}>
+                  <span className="admin-toggle-knob" />
+                </div>
+                <div>
+                  <span className="admin-toggle-name">📌 Pinned</span>
+                  <span className="admin-toggle-desc">Sorts to top of projects grid</span>
+                </div>
+              </label>
             </div>
 
             <div className="admin-form-hint">
@@ -278,23 +303,30 @@ function AdminPage() {
               {projects.map((project) => (
                 <div key={project.id} className="admin-project-row">
                   <div className="admin-project-info">
-                    <span className="admin-project-id">
-                      #{String(project.id).padStart(2, "0")}
-                    </span>
+                    <span className="admin-project-id">#{String(project.id).padStart(2, "0")}</span>
                     <div>
-                      <p className="admin-project-name">{project.title}</p>
+                      <p className="admin-project-name">
+                        {project.pinned && "📌 "}
+                        {project.title}
+                        {project.featured && <span className="admin-featured-tag">Featured</span>}
+                      </p>
                       <p className="admin-project-tech">{project.techStack}</p>
                     </div>
                   </div>
                   <div className="admin-project-row-actions">
-                    <button className="btn btn-edit"
-                      onClick={() => handleEdit(project)}>
-                      Edit
-                    </button>
-                    <button className="btn btn-delete"
-                      onClick={() => setDeleteTarget(project)}>
-                      Delete
-                    </button>
+                    {/* Quick toggles */}
+                    <button
+                      className={`btn-quick-toggle ${project.pinned ? "active" : ""}`}
+                      onClick={() => handleQuickToggle(project, "pinned")}
+                      title={project.pinned ? "Unpin" : "Pin to top"}
+                    >📌</button>
+                    <button
+                      className={`btn-quick-toggle ${project.featured ? "active" : ""}`}
+                      onClick={() => handleQuickToggle(project, "featured")}
+                      title={project.featured ? "Remove featured" : "Mark as featured"}
+                    >⭐</button>
+                    <button className="btn btn-edit" onClick={() => handleEdit(project)}>Edit</button>
+                    <button className="btn btn-delete" onClick={() => setDeleteTarget(project)}>Delete</button>
                   </div>
                 </div>
               ))}

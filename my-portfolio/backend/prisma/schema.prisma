@@ -16,5 +16,7 @@ model Project {
   demoUrl     String?
   gifUrl      String?
   imageUrl    String?
+  featured    Boolean  @default(false)
+  pinned      Boolean  @default(false)
   createdAt   DateTime @default(now())
 }
