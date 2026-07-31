@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import AdminLogin from "./AdminLogin";
 import DeleteModal from "../components/DeleteModal";
 import "./AdminPage.css";
-
+ 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
-
+ 
 const emptyForm = {
   title: "",
   description: "",
@@ -16,7 +16,7 @@ const emptyForm = {
   featured: false,
   pinned: false,
 };
-
+ 
 function AdminPage() {
   const [token, setToken] = useState(
     () => sessionStorage.getItem("admin_token") || null
@@ -28,18 +28,18 @@ function AdminPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [error, setError]               = useState("");
   const [success, setSuccess]           = useState("");
-
+ 
   useEffect(() => { if (token) loadProjects(); }, [token]);
-
+ 
   function authHeaders() {
     return { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
   }
-
+ 
   function handleLogout() {
     sessionStorage.removeItem("admin_token");
     setToken(null);
   }
-
+ 
   async function loadProjects() {
     try {
       setLoading(true);
@@ -53,12 +53,12 @@ function AdminPage() {
       setLoading(false);
     }
   }
-
+ 
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   }
-
+ 
   function handleEdit(project) {
     setEditingProject(project);
     setFormData({
@@ -76,48 +76,48 @@ function AdminPage() {
     setSuccess("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
-
+ 
   function handleCancelEdit() {
     setEditingProject(null);
     setFormData(emptyForm);
     setError("");
   }
-
+ 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
     setSuccess("");
-
+ 
     if (!formData.title || !formData.description || !formData.techStack) {
       setError("Title, Description, and Tech Stack are required.");
       return;
     }
-
+ 
     try {
       setLoading(true);
       const url    = editingProject
         ? `${API_URL}/api/projects/${editingProject.id}`
         : `${API_URL}/api/projects`;
       const method = editingProject ? "PUT" : "POST";
-
+ 
       const res = await fetch(url, {
         method,
         headers: authHeaders(),
         body: JSON.stringify(formData),
       });
-
+ 
       if (res.status === 401 || res.status === 403) {
         setError("Session expired. Please log in again.");
         handleLogout();
         return;
       }
-
+ 
       if (!res.ok) {
         const body = await res.json();
         setError(body.error || "Something went wrong.");
         return;
       }
-
+ 
       setSuccess(editingProject ? "Project updated!" : "Project created!");
       setFormData(emptyForm);
       setEditingProject(null);
@@ -129,7 +129,7 @@ function AdminPage() {
       setLoading(false);
     }
   }
-
+ 
   async function handleConfirmDelete(project) {
     try {
       setLoading(true);
@@ -137,13 +137,13 @@ function AdminPage() {
         method: "DELETE",
         headers: authHeaders(),
       });
-
+ 
       if (res.status === 401 || res.status === 403) {
         setError("Session expired.");
         handleLogout();
         return;
       }
-
+ 
       setDeleteTarget(null);
       setSuccess("Project deleted.");
       await loadProjects();
@@ -154,7 +154,7 @@ function AdminPage() {
       setLoading(false);
     }
   }
-
+ 
   // Quick-toggle featured or pinned from the list without opening edit form
   async function handleQuickToggle(project, field) {
     try {
@@ -169,9 +169,9 @@ function AdminPage() {
       setError("Failed to update project.");
     }
   }
-
+ 
   if (!token) return <AdminLogin onSuccess={(t) => setToken(t)} />;
-
+ 
   return (
     <div className="admin-page">
       <div className="admin-header">
@@ -181,39 +181,39 @@ function AdminPage() {
         </div>
         <button className="admin-logout-btn" onClick={handleLogout}>Log Out</button>
       </div>
-
+ 
       <div className="admin-layout">
-
+ 
         {/* ── FORM ── */}
         <section className="admin-form-section">
           <h3 className="admin-form-title">
             {editingProject ? `Editing: ${editingProject.title}` : "Add New Project"}
           </h3>
-
+ 
           {error   && <p className="admin-msg admin-msg-error">{error}</p>}
           {success && <p className="admin-msg admin-msg-success">{success}</p>}
-
+ 
           <form className="admin-form" onSubmit={handleSubmit}>
             <div className="admin-field-group">
               <label className="admin-label">Title *</label>
               <input className="admin-input" type="text" name="title"
                 value={formData.title} onChange={handleChange} placeholder="Project title" />
             </div>
-
+ 
             <div className="admin-field-group">
               <label className="admin-label">Description *</label>
               <textarea className="admin-input admin-textarea" name="description"
                 value={formData.description} onChange={handleChange} rows={3}
                 placeholder="Short description of the project" />
             </div>
-
+ 
             <div className="admin-field-group">
               <label className="admin-label">Tech Stack *</label>
               <input className="admin-input" type="text" name="techStack"
                 value={formData.techStack} onChange={handleChange}
                 placeholder="React, Node, Prisma, PostgreSQL" />
             </div>
-
+ 
             <div className="admin-field-row">
               <div className="admin-field-group">
                 <label className="admin-label">GitHub Link</label>
@@ -228,7 +228,7 @@ function AdminPage() {
                   placeholder="https://myapp.vercel.app" />
               </div>
             </div>
-
+ 
             <div className="admin-field-row">
               <div className="admin-field-group">
                 <label className="admin-label">GIF Demo URL</label>
@@ -243,7 +243,7 @@ function AdminPage() {
                   placeholder="/images/myapp.png or full URL" />
               </div>
             </div>
-
+ 
             {/* ── Featured & Pinned toggles ── */}
             <div className="admin-toggles">
               <label className="admin-toggle-label">
@@ -256,7 +256,7 @@ function AdminPage() {
                   <span className="admin-toggle-desc">Shows corner ribbon on card</span>
                 </div>
               </label>
-
+ 
               <label className="admin-toggle-label">
                 <div className={`admin-toggle ${formData.pinned ? "on" : ""}`}
                   onClick={() => setFormData(p => ({ ...p, pinned: !p.pinned }))}>
@@ -268,11 +268,11 @@ function AdminPage() {
                 </div>
               </label>
             </div>
-
+ 
             <div className="admin-form-hint">
               Demo priority: Live URL → GIF → Screenshot → Placeholder
             </div>
-
+ 
             <div className="admin-form-actions">
               <button type="submit" className="btn btn-primary" disabled={loading}>
                 {editingProject ? "Save Changes" : "Create Project"}
@@ -286,14 +286,14 @@ function AdminPage() {
             </div>
           </form>
         </section>
-
+ 
         {/* ── PROJECT LIST ── */}
         <section className="admin-list-section">
           <h3 className="admin-list-title">
             All Projects
             <span className="admin-project-count">{projects.length}</span>
           </h3>
-
+ 
           {loading && projects.length === 0 ? (
             <p className="admin-status">Loading...</p>
           ) : projects.length === 0 ? (
@@ -334,7 +334,7 @@ function AdminPage() {
           )}
         </section>
       </div>
-
+ 
       {deleteTarget && (
         <DeleteModal
           project={deleteTarget}
@@ -345,5 +345,6 @@ function AdminPage() {
     </div>
   );
 }
-
+ 
 export default AdminPage;
+ 

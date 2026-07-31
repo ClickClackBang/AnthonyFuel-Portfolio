@@ -1,47 +1,59 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { fetchProjects } from "../api/projectsApi";
 import ProjectCard from "../components/ProjectCard";
 import ProjectModal from "../components/ProjectModal";
 import "./ProjectsPage.css";
 
 /**
- * Diagonal autoplay pairs for a 2-column grid:
+ * Checkerboard autoplay grouping
+ * ────────────────────────────────
+ * Cards are grouped like a checkerboard based on their actual row/col
+ * position in the CSS grid (not a fixed assumption). For a 3-column
+ * grid of 6 cards:
  *
- * Grid positions (0-indexed):
- *   [0] [1]
- *   [2] [3]
- *   [4] [5]  ...
+ *   [1] [2] [3]      row0: col0,col1,col2
+ *   [4] [5] [6]      row1: col0,col1,col2
  *
- * Round 1: positions 0, 3  (top-left + second-row-right)
- * Round 2: positions 1, 2  (top-right + second-row-left)
- * Round 3: positions 4, 7  (next group diagonal 1)
- * Round 4: positions 5, 6  (next group diagonal 2)
- * ...repeating in groups of 4
+ *   Group A (row+col is even): 1, 3, 5
+ *   Group B (row+col is odd) : 2, 4, 6
+ *
+ * This generalizes automatically to any column count the grid actually
+ * renders at (columns can change on resize/breakpoints), so the pattern
+ * stays correct on mobile, tablet, and desktop without hardcoding a
+ * column number.
  */
-function getDiagonalPairs(count) {
-  const pairs = [];
-  for (let base = 0; base < count; base += 4) {
-    // Pair A: top-left of group + bottom-right of group
-    const pairA = [base, base + 3].filter(i => i < count);
-    // Pair B: top-right of group + bottom-left of group
-    const pairB = [base + 1, base + 2].filter(i => i < count);
-    if (pairA.length) pairs.push(pairA);
-    if (pairB.length) pairs.push(pairB);
+function getCheckerboardGroups(count, columns) {
+  const groupA = [];
+  const groupB = [];
+  for (let i = 0; i < count; i++) {
+    const row = Math.floor(i / columns);
+    const col = i % columns;
+    if ((row + col) % 2 === 0) groupA.push(i);
+    else groupB.push(i);
   }
-  return pairs;
+  return [groupA, groupB].filter((g) => g.length > 0);
 }
 
-const GIF_ROUND_DURATION = 4000; // 4 seconds per round
-const PAUSE_BETWEEN = 1000;      // 1 second pause between rounds
+// Note: animated GIFs don't expose a playback-duration API to JS the way
+// <video> does, so "play as long as the longest gif in the set" is
+// approximated with a fixed round length. If you want frame-accurate
+// "play until it finishes" timing, converting previews to short muted
+// <video> loops would let us listen for the real "ended" event instead.
+const GIF_ROUND_DURATION = 4000; // ms per round
+const PAUSE_BETWEEN = 1000;      // ms pause between rounds
 
 function ProjectsPage() {
-  const [projects, setProjects]         = useState([]);
-  const [loading, setLoading]           = useState(false);
-  const [error, setError]               = useState("");
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [selectedProject, setSelectedProject] = useState(null);
-  const [playingIndices, setPlayingIndices]   = useState(new Set());
-  const [currentRound, setCurrentRound]       = useState(0);
-  const timerRef = useRef(null);
+  const [playingIndices, setPlayingIndices] = useState(new Set());
+  const [columns, setColumns] = useState(1);
+
+  const gridRef = useRef(null);
+  const roundTimerRef = useRef(null);
+  const pauseTimerRef = useRef(null);
+  const roundIndexRef = useRef(0);
 
   useEffect(() => { loadProjects(); }, []);
 
@@ -68,33 +80,66 @@ function ProjectsPage() {
     }
   }
 
-  // ── Diagonal autoplay rotation ──────────────────────────
+  // ── Measure actual rendered column count ────────────────
+  const measureColumns = useCallback(() => {
+    if (!gridRef.current) return;
+    const style = window.getComputedStyle(gridRef.current);
+    const template = style.getPropertyValue("grid-template-columns");
+    const count = template.split(" ").filter(Boolean).length || 1;
+    setColumns((prev) => (prev !== count ? count : prev));
+  }, []);
+
   useEffect(() => {
-    if (projects.length === 0) return;
+    measureColumns();
+    const handleResize = () => measureColumns();
+    window.addEventListener("resize", handleResize);
 
-    const pairs = getDiagonalPairs(projects.length);
-    if (pairs.length === 0) return;
+    let observer;
+    if (gridRef.current && "ResizeObserver" in window) {
+      observer = new ResizeObserver(measureColumns);
+      observer.observe(gridRef.current);
+    }
 
-    function playRound(roundIndex) {
-      const pair = pairs[roundIndex % pairs.length];
-      setPlayingIndices(new Set(pair));
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (observer) observer.disconnect();
+    };
+  }, [measureColumns, projects.length]);
 
-      timerRef.current = setTimeout(() => {
-        // 1 second pause
+  // ── Checkerboard autoplay rotation ───────────────────────
+  useEffect(() => {
+    clearTimeout(roundTimerRef.current);
+    clearTimeout(pauseTimerRef.current);
+
+    if (projects.length === 0 || columns < 1) return;
+
+    const groups = getCheckerboardGroups(projects.length, columns);
+    if (groups.length === 0) return;
+
+    roundIndexRef.current = 0;
+
+    function playRound() {
+      const group = groups[roundIndexRef.current % groups.length];
+      setPlayingIndices(new Set(group));
+
+      roundTimerRef.current = setTimeout(() => {
         setPlayingIndices(new Set());
-        timerRef.current = setTimeout(() => {
-          setCurrentRound(r => r + 1);
-          playRound(roundIndex + 1);
+        pauseTimerRef.current = setTimeout(() => {
+          roundIndexRef.current += 1;
+          playRound();
         }, PAUSE_BETWEEN);
       }, GIF_ROUND_DURATION);
     }
 
-    playRound(currentRound);
+    playRound();
 
-    return () => clearTimeout(timerRef.current);
-  }, [projects]);
+    return () => {
+      clearTimeout(roundTimerRef.current);
+      clearTimeout(pauseTimerRef.current);
+    };
+  }, [projects, columns]);
 
-  // ── Modal ────────────────────────────────────────────────
+  // ── Modal ─────────────────────────────────────────────────
   function handleCardClick(project) {
     setSelectedProject(project);
     document.body.style.overflow = "hidden";
@@ -120,7 +165,7 @@ function ProjectsPage() {
           ) : projects.length === 0 ? (
             <p className="status-text">No projects yet.</p>
           ) : (
-            <div className="projects-grid">
+            <div className="projects-grid" ref={gridRef}>
               {projects.map((project, index) => (
                 <ProjectCard
                   key={project.id}
