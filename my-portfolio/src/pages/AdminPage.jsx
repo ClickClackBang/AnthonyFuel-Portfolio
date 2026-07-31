@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import AdminLogin from "./AdminLogin";
 import DeleteModal from "../components/DeleteModal";
 import "./AdminPage.css";
- 
+
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
- 
+
 const emptyForm = {
   title: "",
   description: "",
@@ -16,7 +16,40 @@ const emptyForm = {
   featured: false,
   pinned: false,
 };
- 
+
+/* ── Small inline icons (keep the list compact & consistent) ── */
+function PinIcon({ active }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8">
+      <path d="M12 17v5M8 3h8l-1 6 3 4H6l3-4z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function StarIcon({ active }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8">
+      <path d="M12 3l2.6 5.9 6.4.6-4.8 4.3 1.4 6.3L12 16.9 6.4 20.1l1.4-6.3-4.8-4.3 6.4-.6z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function EditIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function AdminPage() {
   const [token, setToken] = useState(
     () => sessionStorage.getItem("admin_token") || null
@@ -28,18 +61,18 @@ function AdminPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [error, setError]               = useState("");
   const [success, setSuccess]           = useState("");
- 
+
   useEffect(() => { if (token) loadProjects(); }, [token]);
- 
+
   function authHeaders() {
     return { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
   }
- 
+
   function handleLogout() {
     sessionStorage.removeItem("admin_token");
     setToken(null);
   }
- 
+
   async function loadProjects() {
     try {
       setLoading(true);
@@ -53,12 +86,12 @@ function AdminPage() {
       setLoading(false);
     }
   }
- 
+
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   }
- 
+
   function handleEdit(project) {
     setEditingProject(project);
     setFormData({
@@ -76,48 +109,48 @@ function AdminPage() {
     setSuccess("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
- 
+
   function handleCancelEdit() {
     setEditingProject(null);
     setFormData(emptyForm);
     setError("");
   }
- 
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
     setSuccess("");
- 
+
     if (!formData.title || !formData.description || !formData.techStack) {
       setError("Title, Description, and Tech Stack are required.");
       return;
     }
- 
+
     try {
       setLoading(true);
       const url    = editingProject
         ? `${API_URL}/api/projects/${editingProject.id}`
         : `${API_URL}/api/projects`;
       const method = editingProject ? "PUT" : "POST";
- 
+
       const res = await fetch(url, {
         method,
         headers: authHeaders(),
         body: JSON.stringify(formData),
       });
- 
+
       if (res.status === 401 || res.status === 403) {
         setError("Session expired. Please log in again.");
         handleLogout();
         return;
       }
- 
+
       if (!res.ok) {
         const body = await res.json();
         setError(body.error || "Something went wrong.");
         return;
       }
- 
+
       setSuccess(editingProject ? "Project updated!" : "Project created!");
       setFormData(emptyForm);
       setEditingProject(null);
@@ -129,7 +162,7 @@ function AdminPage() {
       setLoading(false);
     }
   }
- 
+
   async function handleConfirmDelete(project) {
     try {
       setLoading(true);
@@ -137,13 +170,13 @@ function AdminPage() {
         method: "DELETE",
         headers: authHeaders(),
       });
- 
+
       if (res.status === 401 || res.status === 403) {
         setError("Session expired.");
         handleLogout();
         return;
       }
- 
+
       setDeleteTarget(null);
       setSuccess("Project deleted.");
       await loadProjects();
@@ -154,8 +187,7 @@ function AdminPage() {
       setLoading(false);
     }
   }
- 
-  // Quick-toggle featured or pinned from the list without opening edit form
+
   async function handleQuickToggle(project, field) {
     try {
       const updated = { ...project, [field]: !project[field] };
@@ -169,9 +201,9 @@ function AdminPage() {
       setError("Failed to update project.");
     }
   }
- 
+
   if (!token) return <AdminLogin onSuccess={(t) => setToken(t)} />;
- 
+
   return (
     <div className="admin-page">
       <div className="admin-header">
@@ -181,98 +213,113 @@ function AdminPage() {
         </div>
         <button className="admin-logout-btn" onClick={handleLogout}>Log Out</button>
       </div>
- 
+
       <div className="admin-layout">
- 
-        {/* ── FORM ── */}
+
+        {/* ═══════════════ LEFT: FORM ═══════════════ */}
         <section className="admin-form-section">
           <h3 className="admin-form-title">
             {editingProject ? `Editing: ${editingProject.title}` : "Add New Project"}
           </h3>
- 
+
           {error   && <p className="admin-msg admin-msg-error">{error}</p>}
           {success && <p className="admin-msg admin-msg-success">{success}</p>}
- 
+
           <form className="admin-form" onSubmit={handleSubmit}>
-            <div className="admin-field-group">
-              <label className="admin-label">Title *</label>
-              <input className="admin-input" type="text" name="title"
-                value={formData.title} onChange={handleChange} placeholder="Project title" />
-            </div>
- 
-            <div className="admin-field-group">
-              <label className="admin-label">Description *</label>
-              <textarea className="admin-input admin-textarea" name="description"
-                value={formData.description} onChange={handleChange} rows={3}
-                placeholder="Short description of the project" />
-            </div>
- 
-            <div className="admin-field-group">
-              <label className="admin-label">Tech Stack *</label>
-              <input className="admin-input" type="text" name="techStack"
-                value={formData.techStack} onChange={handleChange}
-                placeholder="React, Node, Prisma, PostgreSQL" />
-            </div>
- 
-            <div className="admin-field-row">
+
+            {/* ── Section: Basic Info ── */}
+            <div className="admin-fieldset">
+              <p className="admin-section-label">Basic Info</p>
+
               <div className="admin-field-group">
-                <label className="admin-label">GitHub Link</label>
-                <input className="admin-input" type="url" name="link"
-                  value={formData.link} onChange={handleChange}
-                  placeholder="https://github.com/..." />
+                <label className="admin-label">Title *</label>
+                <input className="admin-input" type="text" name="title"
+                  value={formData.title} onChange={handleChange} placeholder="Project title" />
               </div>
+
               <div className="admin-field-group">
-                <label className="admin-label">Live Demo URL</label>
-                <input className="admin-input" type="url" name="demoUrl"
-                  value={formData.demoUrl} onChange={handleChange}
-                  placeholder="https://myapp.vercel.app" />
+                <label className="admin-label">Description *</label>
+                <textarea className="admin-input admin-textarea" name="description"
+                  value={formData.description} onChange={handleChange} rows={3}
+                  placeholder="Short description of the project" />
+              </div>
+
+              <div className="admin-field-group">
+                <label className="admin-label">Tech Stack *</label>
+                <input className="admin-input" type="text" name="techStack"
+                  value={formData.techStack} onChange={handleChange}
+                  placeholder="React, Node, Prisma, PostgreSQL" />
               </div>
             </div>
- 
-            <div className="admin-field-row">
-              <div className="admin-field-group">
-                <label className="admin-label">GIF Demo URL</label>
-                <input className="admin-input" type="text" name="gifUrl"
-                  value={formData.gifUrl} onChange={handleChange}
-                  placeholder="/demos/myapp.gif or full URL" />
+
+            {/* ── Section: Links & Media ── */}
+            <div className="admin-fieldset">
+              <p className="admin-section-label">Links &amp; Media</p>
+
+              <div className="admin-field-row">
+                <div className="admin-field-group">
+                  <label className="admin-label">GitHub Link</label>
+                  <input className="admin-input" type="url" name="link"
+                    value={formData.link} onChange={handleChange}
+                    placeholder="https://github.com/..." />
+                </div>
+                <div className="admin-field-group">
+                  <label className="admin-label">Live Demo URL</label>
+                  <input className="admin-input" type="url" name="demoUrl"
+                    value={formData.demoUrl} onChange={handleChange}
+                    placeholder="https://myapp.vercel.app" />
+                </div>
               </div>
-              <div className="admin-field-group">
-                <label className="admin-label">Screenshot URL</label>
-                <input className="admin-input" type="text" name="imageUrl"
-                  value={formData.imageUrl} onChange={handleChange}
-                  placeholder="/images/myapp.png or full URL" />
+
+              <div className="admin-field-row">
+                <div className="admin-field-group">
+                  <label className="admin-label">GIF Demo URL</label>
+                  <input className="admin-input" type="text" name="gifUrl"
+                    value={formData.gifUrl} onChange={handleChange}
+                    placeholder="/demos/myapp.gif or full URL" />
+                </div>
+                <div className="admin-field-group">
+                  <label className="admin-label">Screenshot URL</label>
+                  <input className="admin-input" type="text" name="imageUrl"
+                    value={formData.imageUrl} onChange={handleChange}
+                    placeholder="/images/myapp.png or full URL" />
+                </div>
+              </div>
+
+              <div className="admin-form-hint">
+                Demo priority: Live URL → GIF → Screenshot → Placeholder
               </div>
             </div>
- 
-            {/* ── Featured & Pinned toggles ── */}
-            <div className="admin-toggles">
-              <label className="admin-toggle-label">
-                <div className={`admin-toggle ${formData.featured ? "on" : ""}`}
-                  onClick={() => setFormData(p => ({ ...p, featured: !p.featured }))}>
-                  <span className="admin-toggle-knob" />
-                </div>
-                <div>
-                  <span className="admin-toggle-name">Featured</span>
-                  <span className="admin-toggle-desc">Shows corner ribbon on card</span>
-                </div>
-              </label>
- 
-              <label className="admin-toggle-label">
-                <div className={`admin-toggle ${formData.pinned ? "on" : ""}`}
-                  onClick={() => setFormData(p => ({ ...p, pinned: !p.pinned }))}>
-                  <span className="admin-toggle-knob" />
-                </div>
-                <div>
-                  <span className="admin-toggle-name">📌 Pinned</span>
-                  <span className="admin-toggle-desc">Sorts to top of projects grid</span>
-                </div>
-              </label>
+
+            {/* ── Section: Visibility ── */}
+            <div className="admin-fieldset">
+              <p className="admin-section-label">Visibility</p>
+
+              <div className="admin-toggles">
+                <label className="admin-toggle-label">
+                  <div className={`admin-toggle ${formData.featured ? "on" : ""}`}
+                    onClick={() => setFormData(p => ({ ...p, featured: !p.featured }))}>
+                    <span className="admin-toggle-knob" />
+                  </div>
+                  <div>
+                    <span className="admin-toggle-name">Featured</span>
+                    <span className="admin-toggle-desc">Gold award ribbon on card</span>
+                  </div>
+                </label>
+
+                <label className="admin-toggle-label">
+                  <div className={`admin-toggle ${formData.pinned ? "on" : ""}`}
+                    onClick={() => setFormData(p => ({ ...p, pinned: !p.pinned }))}>
+                    <span className="admin-toggle-knob" />
+                  </div>
+                  <div>
+                    <span className="admin-toggle-name">Pinned</span>
+                    <span className="admin-toggle-desc">Sorts to top of projects grid</span>
+                  </div>
+                </label>
+              </div>
             </div>
- 
-            <div className="admin-form-hint">
-              Demo priority: Live URL → GIF → Screenshot → Placeholder
-            </div>
- 
+
             <div className="admin-form-actions">
               <button type="submit" className="btn btn-primary" disabled={loading}>
                 {editingProject ? "Save Changes" : "Create Project"}
@@ -286,14 +333,14 @@ function AdminPage() {
             </div>
           </form>
         </section>
- 
-        {/* ── PROJECT LIST ── */}
+
+        {/* ═══════════════ RIGHT: CONCISE LIST ═══════════════ */}
         <section className="admin-list-section">
           <h3 className="admin-list-title">
             All Projects
             <span className="admin-project-count">{projects.length}</span>
           </h3>
- 
+
           {loading && projects.length === 0 ? (
             <p className="admin-status">Loading...</p>
           ) : projects.length === 0 ? (
@@ -301,32 +348,56 @@ function AdminPage() {
           ) : (
             <div className="admin-project-list">
               {projects.map((project) => (
-                <div key={project.id} className="admin-project-row">
-                  <div className="admin-project-info">
-                    <span className="admin-project-id">#{String(project.id).padStart(2, "0")}</span>
-                    <div>
-                      <p className="admin-project-name">
-                        {project.pinned && "📌 "}
-                        {project.title}
-                        {project.featured && <span className="admin-featured-tag">Featured</span>}
-                      </p>
-                      <p className="admin-project-tech">{project.techStack}</p>
-                    </div>
+                <div key={project.id} className="admin-row">
+                  <div className="admin-row-main">
+                    <span className="admin-row-id">
+                      {String(project.id).padStart(2, "0")}
+                    </span>
+                    <span className="admin-row-title">
+                      {project.title}
+                    </span>
+                    {project.pinned && (
+                      <span className="admin-row-flag admin-row-flag--pin" title="Pinned">
+                        <PinIcon active />
+                      </span>
+                    )}
+                    {project.featured && (
+                      <span className="admin-row-flag admin-row-flag--star" title="Featured">
+                        <StarIcon active />
+                      </span>
+                    )}
                   </div>
-                  <div className="admin-project-row-actions">
-                    {/* Quick toggles */}
+
+                  <div className="admin-row-actions">
                     <button
-                      className={`btn-quick-toggle ${project.pinned ? "active" : ""}`}
+                      className={`admin-icon-btn ${project.pinned ? "on" : ""}`}
                       onClick={() => handleQuickToggle(project, "pinned")}
                       title={project.pinned ? "Unpin" : "Pin to top"}
-                    >📌</button>
+                    >
+                      <PinIcon active={project.pinned} />
+                    </button>
                     <button
-                      className={`btn-quick-toggle ${project.featured ? "active" : ""}`}
+                      className={`admin-icon-btn ${project.featured ? "on" : ""}`}
                       onClick={() => handleQuickToggle(project, "featured")}
                       title={project.featured ? "Remove featured" : "Mark as featured"}
-                    >⭐</button>
-                    <button className="btn btn-edit" onClick={() => handleEdit(project)}>Edit</button>
-                    <button className="btn btn-delete" onClick={() => setDeleteTarget(project)}>Delete</button>
+                    >
+                      <StarIcon active={project.featured} />
+                    </button>
+                    <span className="admin-row-divider" />
+                    <button
+                      className="admin-icon-btn"
+                      onClick={() => handleEdit(project)}
+                      title="Edit"
+                    >
+                      <EditIcon />
+                    </button>
+                    <button
+                      className="admin-icon-btn admin-icon-btn--danger"
+                      onClick={() => setDeleteTarget(project)}
+                      title="Delete"
+                    >
+                      <TrashIcon />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -334,7 +405,7 @@ function AdminPage() {
           )}
         </section>
       </div>
- 
+
       {deleteTarget && (
         <DeleteModal
           project={deleteTarget}
@@ -345,6 +416,5 @@ function AdminPage() {
     </div>
   );
 }
- 
+
 export default AdminPage;
- 

@@ -63,34 +63,20 @@
   box-shadow: 0 0 0 1px rgba(99, 210, 219, 0.15), 0 8px 30px rgba(0,0,0,0.4);
 }
 
-/* ─── Corner Ribbon ──────────────────────────────────────── */
-.card-ribbon {
+/* ─── Award Ribbon (Featured) ────────────────────────────── */
+.card-award-ribbon {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 90px;
-  height: 90px;
-  overflow: hidden;
+  top: 8px;
+  left: 14px;
   z-index: 10;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+  transition: transform var(--transition);
   pointer-events: none;
 }
 
-.card-ribbon span {
-  position: absolute;
-  top: 18px;
-  left: -22px;
-  width: 100px;
-  background: var(--accent);
-  color: var(--bg);
-  font-family: var(--font-mono);
-  font-size: 0.55rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  text-align: center;
-  padding: 4px 0;
-  transform: rotate(-45deg);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+.project-card:hover .card-award-ribbon,
+.project-card--playing .card-award-ribbon {
+  transform: translateY(-2px) scale(1.04);
 }
 
 /* ─── Pinned Badge ───────────────────────────────────────── */
