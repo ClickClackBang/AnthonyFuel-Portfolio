@@ -17,51 +17,109 @@ const emptyForm = {
   pinned: false,
 };
 
-/* ── Small inline icons (keep the list compact & consistent) ── */
+/* ── Small inline icons (keep the list compact & consistent) ──
+   Styles are set inline (not via SVG attributes) so nothing in the
+   site's global CSS — e.g. a `svg { fill: ... }` reset — can blank
+   these out. Inline style beats any external stylesheet rule that
+   isn't using !important. */
 function PinIcon({ active }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
-      <path d="M12 17v5M8 3h8l-1 6 3 4H6l3-4z" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="14" height="14" viewBox="0 0 24 24" style={{ display: "block", overflow: "visible" }}>
+      <path
+        d="M12 17v5M8 3h8l-1 6 3 4H6l3-4z"
+        style={{
+          fill: active ? "currentColor" : "none",
+          stroke: "currentColor",
+          strokeWidth: 2,
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+        }}
+      />
     </svg>
   );
 }
 
 function StarIcon({ active }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
-      <path d="M12 3l2.6 5.9 6.4.6-4.8 4.3 1.4 6.3L12 16.9 6.4 20.1l1.4-6.3-4.8-4.3 6.4-.6z" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="14" height="14" viewBox="0 0 24 24" style={{ display: "block", overflow: "visible" }}>
+      <path
+        d="M12 3l2.6 5.9 6.4.6-4.8 4.3 1.4 6.3L12 16.9 6.4 20.1l1.4-6.3-4.8-4.3 6.4-.6z"
+        style={{
+          fill: active ? "currentColor" : "none",
+          stroke: "currentColor",
+          strokeWidth: 2,
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+        }}
+      />
     </svg>
   );
 }
 
 function EditIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="14" height="14" viewBox="0 0 24 24" style={{ display: "block", overflow: "visible" }}>
+      <path
+        d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"
+        style={{
+          fill: "none",
+          stroke: "currentColor",
+          strokeWidth: 2,
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+        }}
+      />
     </svg>
   );
 }
 
 function TrashIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="14" height="14" viewBox="0 0 24 24" style={{ display: "block", overflow: "visible" }}>
+      <path
+        d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"
+        style={{
+          fill: "none",
+          stroke: "currentColor",
+          strokeWidth: 2,
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+        }}
+      />
     </svg>
   );
 }
 
 function ChevronUpIcon() {
   return (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-      <path d="M6 15l6-6 6 6" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="12" height="12" viewBox="0 0 24 24" style={{ display: "block", overflow: "visible" }}>
+      <path
+        d="M6 15l6-6 6 6"
+        style={{
+          fill: "none",
+          stroke: "currentColor",
+          strokeWidth: 2.4,
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+        }}
+      />
     </svg>
   );
 }
 
 function ChevronDownIcon() {
   return (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-      <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="12" height="12" viewBox="0 0 24 24" style={{ display: "block", overflow: "visible" }}>
+      <path
+        d="M6 9l6 6 6-6"
+        style={{
+          fill: "none",
+          stroke: "currentColor",
+          strokeWidth: 2.4,
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+        }}
+      />
     </svg>
   );
 }
@@ -218,30 +276,33 @@ function AdminPage() {
     }
   }
 
-  // Swaps this project's `order` value with its neighbor in the
-  // currently displayed list, moving it visually up or down.
+  // Moves a project up or down and re-numbers EVERY project's `order`
+  // to match the new sequence (1, 2, 3...). Re-indexing the whole list
+  // (rather than swapping just two values) is what makes this reliable:
+  // brand-new/migrated projects all start at order = 0, so swapping two
+  // tied zeros does nothing. Re-numbering the full list guarantees every
+  // project has a distinct order value from the very first click.
   async function handleReorder(project, direction) {
     const currentIndex = projects.findIndex((p) => p.id === project.id);
     const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
     if (targetIndex < 0 || targetIndex >= projects.length) return;
 
-    const neighbor = projects[targetIndex];
-    const currentOrder = project.order ?? 0;
-    const neighborOrder = neighbor.order ?? 0;
+    const reordered = [...projects];
+    const [moved] = reordered.splice(currentIndex, 1);
+    reordered.splice(targetIndex, 0, moved);
+
+    const renumbered = reordered.map((p, idx) => ({ ...p, order: idx + 1 }));
 
     try {
-      await Promise.all([
-        fetch(`${API_URL}/api/projects/${project.id}`, {
-          method: "PUT",
-          headers: authHeaders(),
-          body: JSON.stringify({ ...project, order: neighborOrder }),
-        }),
-        fetch(`${API_URL}/api/projects/${neighbor.id}`, {
-          method: "PUT",
-          headers: authHeaders(),
-          body: JSON.stringify({ ...neighbor, order: currentOrder }),
-        }),
-      ]);
+      await Promise.all(
+        renumbered.map((p) =>
+          fetch(`${API_URL}/api/projects/${p.id}`, {
+            method: "PUT",
+            headers: authHeaders(),
+            body: JSON.stringify(p),
+          })
+        )
+      );
       await loadProjects();
     } catch {
       setError("Failed to reorder.");
