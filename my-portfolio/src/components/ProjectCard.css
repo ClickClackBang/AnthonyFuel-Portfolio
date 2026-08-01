@@ -63,20 +63,60 @@
   box-shadow: 0 0 0 1px rgba(99, 210, 219, 0.15), 0 8px 30px rgba(0,0,0,0.4);
 }
 
-/* ─── Award Ribbon (Featured) ────────────────────────────── */
-.card-award-ribbon {
+/* ─── Featured Corner Ribbon ─────────────────────────────── */
+.card-corner-ribbon {
   position: absolute;
-  top: 8px;
-  left: 14px;
+  top: 0;
+  left: 0;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
   z-index: 10;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
-  transition: transform var(--transition);
   pointer-events: none;
 }
 
-.project-card:hover .card-award-ribbon,
-.project-card--playing .card-award-ribbon {
-  transform: translateY(-2px) scale(1.04);
+.ribbon-strip {
+  position: absolute;
+  top: 13px;
+  left: -19px;
+  width: 92px;
+  height: 19px;
+  background: linear-gradient(135deg, #FBE7A6 0%, #E4B02E 45%, #A97A12 100%);
+  transform: rotate(-45deg);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+}
+
+/* Small folded flap tips for a subtle tucked-corner look */
+.ribbon-strip::before,
+.ribbon-strip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+.ribbon-strip::before {
+  left: 0;
+  border-width: 5px 5px 0 0;
+  border-color: #7c5a08 transparent transparent transparent;
+}
+
+.ribbon-strip::after {
+  right: 0;
+  border-width: 5px 0 0 5px;
+  border-color: #7c5a08 transparent transparent transparent;
+}
+
+/* If a card has no media preview, the ribbon would otherwise sit
+   directly on top of the title/index row. This sibling selector only
+   fires when project-card-inner immediately follows the ribbon (i.e.
+   no .card-media-wrapper in between), nudging the text down just
+   enough to clear the diagonal — cards WITH media are unaffected,
+   since the ribbon sits over the image there instead. */
+.card-corner-ribbon + .project-card-inner {
+  padding-top: 2.1rem;
 }
 
 /* ─── Pinned Badge ───────────────────────────────────────── */

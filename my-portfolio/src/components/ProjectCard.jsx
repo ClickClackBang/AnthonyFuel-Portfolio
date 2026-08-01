@@ -74,43 +74,10 @@ function ProjectCard({ project, onClick, isPlaying }) {
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && onClick()}
     >
-      {/* Featured award ribbon */}
+      {/* Featured corner ribbon */}
       {project.featured && (
-        <div className="card-award-ribbon" title="Featured Project" aria-label="Featured project">
-          <svg viewBox="0 0 60 92" width="42" height="64" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id={`ribbonTail-${project.id}`} x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#FDE8A0" />
-                <stop offset="50%" stopColor="#E8B429" />
-                <stop offset="100%" stopColor="#A9770E" />
-              </linearGradient>
-              <radialGradient id={`medallion-${project.id}`} cx="35%" cy="30%" r="75%">
-                <stop offset="0%" stopColor="#FFF7DC" />
-                <stop offset="55%" stopColor="#F3C542" />
-                <stop offset="100%" stopColor="#B9860F" />
-              </radialGradient>
-            </defs>
-
-            {/* Ribbon tails */}
-            <path
-              d="M17 33 L8 88 L30 74 L52 88 L43 33 Z"
-              fill={`url(#ribbonTail-${project.id})`}
-              stroke="#8a6710"
-              strokeWidth="1"
-            />
-            {/* Tail center crease */}
-            <path d="M30 36 L30 74" stroke="#8a6710" strokeWidth="1" opacity="0.35" />
-
-            {/* Medallion */}
-            <circle cx="30" cy="25" r="23" fill={`url(#medallion-${project.id})`} stroke="#8a6710" strokeWidth="1.5" />
-            <circle cx="30" cy="25" r="23" fill="none" stroke="#fff6d8" strokeWidth="1" opacity="0.45" />
-
-            {/* Star */}
-            <path
-              d="M30 12 L33.2 21 L42 21 L34.8 26.5 L37.5 35.5 L30 30 L22.5 35.5 L25.2 26.5 L18 21 L26.8 21 Z"
-              fill="#8a6710"
-            />
-          </svg>
+        <div className="card-corner-ribbon" title="Featured Project" aria-label="Featured project">
+          <span className="ribbon-strip" />
         </div>
       )}
 

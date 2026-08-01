@@ -34,11 +34,6 @@ function getCheckerboardGroups(count, columns) {
   return [groupA, groupB].filter((g) => g.length > 0);
 }
 
-// Note: animated GIFs don't expose a playback-duration API to JS the way
-// <video> does, so "play as long as the longest gif in the set" is
-// approximated with a fixed round length. If you want frame-accurate
-// "play until it finishes" timing, converting previews to short muted
-// <video> loops would let us listen for the real "ended" event instead.
 const GIF_ROUND_DURATION = 4000; // ms per round
 const PAUSE_BETWEEN = 1000;      // ms pause between rounds
 
@@ -61,18 +56,11 @@ function ProjectsPage() {
     try {
       setLoading(true);
       setError("");
+      // The backend already returns projects sorted by the manual
+      // `order` field you control from the admin panel's up/down
+      // arrows — no client-side re-sorting needed here.
       const data = await fetchProjects();
-
-      // Sort: pinned first, then featured, then alphabetical
-      const sorted = (data || []).sort((a, b) => {
-        if (a.pinned && !b.pinned) return -1;
-        if (!a.pinned && b.pinned) return 1;
-        if (a.featured && !b.featured) return -1;
-        if (!a.featured && b.featured) return 1;
-        return a.title.localeCompare(b.title);
-      });
-
-      setProjects(sorted);
+      setProjects(data || []);
     } catch (err) {
       setError(err.message || "Failed to load projects.");
     } finally {

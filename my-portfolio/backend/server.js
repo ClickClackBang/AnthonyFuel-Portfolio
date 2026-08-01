@@ -42,9 +42,13 @@ function requireAdmin(req, res, next) {
 }
 
 // ─── GET ALL PROJECTS (public) ────────────────────────────
+// Sorted by manual `order` first (what you control with the admin
+// up/down arrows), falling back to newest-first for any ties.
 app.get("/api/projects", async (req, res) => {
   try {
-    const projects = await prisma.project.findMany({ orderBy: { id: "desc" } });
+    const projects = await prisma.project.findMany({
+      orderBy: [{ order: "asc" }, { id: "desc" }],
+    });
     res.json(projects);
   } catch (error) {
     console.error("GET /projects error:", error);
@@ -61,8 +65,17 @@ app.post("/api/projects", requireAdmin, async (req, res) => {
   }
 
   try {
+    // New projects go to the end of the list by default —
+    // one more than whatever the current highest order value is.
+    const last = await prisma.project.findFirst({ orderBy: { order: "desc" } });
+    const nextOrder = last ? last.order + 1 : 1;
+
     const project = await prisma.project.create({
-      data: { title, description, techStack, link, demoUrl, gifUrl, imageUrl, featured: !!featured, pinned: !!pinned },
+      data: {
+        title, description, techStack, link, demoUrl, gifUrl, imageUrl,
+        featured: !!featured, pinned: !!pinned,
+        order: nextOrder,
+      },
     });
     res.status(201).json(project);
   } catch (error) {
@@ -72,9 +85,12 @@ app.post("/api/projects", requireAdmin, async (req, res) => {
 });
 
 // ─── UPDATE PROJECT (admin only) ──────────────────────────
+// `order` is optional here on purpose: normal edits (title, links, etc.)
+// via the form don't include it, so the project's position is left
+// untouched. Only the dedicated reorder controls send an explicit order.
 app.put("/api/projects/:id", requireAdmin, async (req, res) => {
   const id = Number(req.params.id);
-  const { title, description, techStack, link, demoUrl, gifUrl, imageUrl, featured, pinned } = req.body;
+  const { title, description, techStack, link, demoUrl, gifUrl, imageUrl, featured, pinned, order } = req.body;
 
   if (!title || !description || !techStack) {
     return res.status(400).json({ error: "Title, description, and techStack are required." });
@@ -84,10 +100,13 @@ app.put("/api/projects/:id", requireAdmin, async (req, res) => {
     const exists = await prisma.project.findUnique({ where: { id } });
     if (!exists) return res.status(404).json({ error: "Project not found" });
 
-    const updated = await prisma.project.update({
-      where: { id },
-      data: { title, description, techStack, link, demoUrl, gifUrl, imageUrl, featured: !!featured, pinned: !!pinned },
-    });
+    const data = {
+      title, description, techStack, link, demoUrl, gifUrl, imageUrl,
+      featured: !!featured, pinned: !!pinned,
+    };
+    if (typeof order === "number") data.order = order;
+
+    const updated = await prisma.project.update({ where: { id }, data });
     res.json(updated);
   } catch (error) {
     console.error("PUT /projects error:", error);

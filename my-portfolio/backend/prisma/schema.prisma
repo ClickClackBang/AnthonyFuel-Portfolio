@@ -18,5 +18,6 @@ model Project {
   imageUrl    String?
   featured    Boolean  @default(false)
   pinned      Boolean  @default(false)
+  order       Int      @default(0)
   createdAt   DateTime @default(now())
 }

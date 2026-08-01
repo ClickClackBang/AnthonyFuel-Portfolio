@@ -20,7 +20,7 @@ const emptyForm = {
 /* ── Small inline icons (keep the list compact & consistent) ── */
 function PinIcon({ active }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
       <path d="M12 17v5M8 3h8l-1 6 3 4H6l3-4z" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -28,7 +28,7 @@ function PinIcon({ active }) {
 
 function StarIcon({ active }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
       <path d="M12 3l2.6 5.9 6.4.6-4.8 4.3 1.4 6.3L12 16.9 6.4 20.1l1.4-6.3-4.8-4.3 6.4-.6z" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -36,7 +36,7 @@ function StarIcon({ active }) {
 
 function EditIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -44,8 +44,24 @@ function EditIcon() {
 
 function TrashIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ChevronUpIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+      <path d="M6 15l6-6 6 6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+      <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -202,6 +218,36 @@ function AdminPage() {
     }
   }
 
+  // Swaps this project's `order` value with its neighbor in the
+  // currently displayed list, moving it visually up or down.
+  async function handleReorder(project, direction) {
+    const currentIndex = projects.findIndex((p) => p.id === project.id);
+    const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= projects.length) return;
+
+    const neighbor = projects[targetIndex];
+    const currentOrder = project.order ?? 0;
+    const neighborOrder = neighbor.order ?? 0;
+
+    try {
+      await Promise.all([
+        fetch(`${API_URL}/api/projects/${project.id}`, {
+          method: "PUT",
+          headers: authHeaders(),
+          body: JSON.stringify({ ...project, order: neighborOrder }),
+        }),
+        fetch(`${API_URL}/api/projects/${neighbor.id}`, {
+          method: "PUT",
+          headers: authHeaders(),
+          body: JSON.stringify({ ...neighbor, order: currentOrder }),
+        }),
+      ]);
+      await loadProjects();
+    } catch {
+      setError("Failed to reorder.");
+    }
+  }
+
   if (!token) return <AdminLogin onSuccess={(t) => setToken(t)} />;
 
   return (
@@ -314,7 +360,7 @@ function AdminPage() {
                   </div>
                   <div>
                     <span className="admin-toggle-name">Pinned</span>
-                    <span className="admin-toggle-desc">Sorts to top of projects grid</span>
+                    <span className="admin-toggle-desc">Shows a pin badge (use ↑↓ to set position)</span>
                   </div>
                 </label>
               </div>
@@ -347,8 +393,27 @@ function AdminPage() {
             <p className="admin-status">No projects yet.</p>
           ) : (
             <div className="admin-project-list">
-              {projects.map((project) => (
+              {projects.map((project, idx) => (
                 <div key={project.id} className="admin-row">
+                  <div className="admin-reorder-stack">
+                    <button
+                      className="admin-reorder-btn"
+                      onClick={() => handleReorder(project, "up")}
+                      disabled={idx === 0}
+                      title="Move up"
+                    >
+                      <ChevronUpIcon />
+                    </button>
+                    <button
+                      className="admin-reorder-btn"
+                      onClick={() => handleReorder(project, "down")}
+                      disabled={idx === projects.length - 1}
+                      title="Move down"
+                    >
+                      <ChevronDownIcon />
+                    </button>
+                  </div>
+
                   <div className="admin-row-main">
                     <span className="admin-row-id">
                       {String(project.id).padStart(2, "0")}
@@ -372,7 +437,7 @@ function AdminPage() {
                     <button
                       className={`admin-icon-btn ${project.pinned ? "on" : ""}`}
                       onClick={() => handleQuickToggle(project, "pinned")}
-                      title={project.pinned ? "Unpin" : "Pin to top"}
+                      title={project.pinned ? "Remove pin badge" : "Add pin badge"}
                     >
                       <PinIcon active={project.pinned} />
                     </button>
