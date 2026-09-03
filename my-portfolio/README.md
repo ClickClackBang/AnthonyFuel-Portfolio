@@ -2,7 +2,7 @@
 
 A full-stack personal portfolio application built to showcase projects, professional experience, and technical skills. Features a custom dark editorial UI with a futuristic aesthetic, live animated terminal widget, and full project CRUD functionality backed by a REST API.
 
-**Live Site:** [your-vercel-url.vercel.app](#) ← replace with your URL
+**Live Site:** [anthony-fuel-portfolio.vercel.app](https://anthony-fuel-portfolio.vercel.app)
 
 ---
 
@@ -20,7 +20,7 @@ A full-stack personal portfolio application built to showcase projects, professi
 - Input validation and error handling
 
 **Database**
-- PostgreSQL (production via Render)
+- PostgreSQL (production via Neon)
 - SQLite (local development)
 - Prisma ORM
 
@@ -28,7 +28,7 @@ A full-stack personal portfolio application built to showcase projects, professi
 
 ## Project Structure
 
-```
+`````
 my-portfolio/
 ├── backend/
 │   ├── prisma/
@@ -36,7 +36,7 @@ my-portfolio/
 │   │   └── migrations/
 │   ├── server.js
 │   ├── package.json
-│   └── .env
+│   └── .env.example
 └── src/
     ├── api/
     │   └── projectsApi.js
@@ -54,13 +54,13 @@ my-portfolio/
     ├── App.jsx
     ├── App.css
     └── main.jsx
-```
+`````
 
 ---
 
 ## Prisma Schema
 
-```prisma
+`````prisma
 model Project {
   id          Int      @id @default(autoincrement())
   title       String
@@ -70,7 +70,7 @@ model Project {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
-```
+`````
 
 ---
 
@@ -88,30 +88,33 @@ model Project {
 ## Running Locally
 
 ### Backend
-```bash
+
+`````bash
 cd backend
 npm install
 npx prisma migrate dev
 node server.js
 # Runs at http://localhost:4000
-```
+`````
 
 ### Frontend
-```bash
+
+`````bash
 cd my-portfolio
 npm install
 npm run dev
 # Runs at http://localhost:5173
-```
+`````
 
 ### Environment Variables
 
-Create a `.env` file inside the `backend/` folder:
+Copy `.env.example` to `.env` inside the `backend/` folder and fill in your values:
 
-```
+`````
 DATABASE_URL="file:./dev.db"   # SQLite for local development
 PORT=4000
-```
+ADMIN_PASSWORD=
+`````
 
 > Never commit your `.env` file. It is listed in `.gitignore`.
 
@@ -123,7 +126,7 @@ PORT=4000
 |-------|----------|
 | Frontend | Vercel |
 | Backend | Render |
-| Database | Render PostgreSQL |
+| Database | Neon PostgreSQL |
 
 **Frontend (Vercel)**
 - Import the GitHub repo
@@ -135,7 +138,7 @@ PORT=4000
 - Root Directory: `backend`
 - Build Command: `npm install && npx prisma generate`
 - Start Command: `node server.js`
-- Set environment variables: `DATABASE_URL`, `NODE_ENV=production`
+- Set environment variables: `DATABASE_URL`, `ADMIN_PASSWORD`, `NODE_ENV=production`
 
 ---
 
