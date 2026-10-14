@@ -31,9 +31,29 @@ const validateProjectPayload = (project) => {
 /* ------------------------------
    CRUD FUNCTIONS
 ------------------------------ */
-export const fetchProjects = async () => {
-  const res = await fetch(`${API_BASE_URL}`);
-  return handleResponse(res);
+const CACHE_KEY = "projects_cache_v1";
+
+export const getCachedProjects = () => {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+let inflight = null;
+
+export const fetchProjects = () => {
+  if (inflight) return inflight;
+  inflight = fetch(API_BASE_URL)
+    .then(handleResponse)
+    .then((data) => {
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch {}
+      return data;
+    })
+    .finally(() => { inflight = null; });
+  return inflight;
 };
 
 export const createProject = async (project) => {

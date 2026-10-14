@@ -41,6 +41,9 @@ function requireAdmin(req, res, next) {
   }
 }
 
+// ─── HEALTH CHECK ────────────────────────────────────────
+app.get("/api/health", (req, res) => res.json({ ok: true }));
+
 // ─── GET ALL PROJECTS (public) ────────────────────────────
 // Sorted by manual `order` first (what you control with the admin
 // up/down arrows), falling back to newest-first for any ties.

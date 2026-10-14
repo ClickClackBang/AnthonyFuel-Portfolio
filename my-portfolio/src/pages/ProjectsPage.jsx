@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { fetchProjects } from "../api/projectsApi";
+import { fetchProjects, getCachedProjects } from "../api/projectsApi";
 import ProjectCard from "../components/ProjectCard";
 import ProjectModal from "../components/ProjectModal";
 import "./ProjectsPage.css";
@@ -38,8 +38,9 @@ const GIF_ROUND_DURATION = 4000; // ms per round
 const PAUSE_BETWEEN = 1000;      // ms pause between rounds
 
 function ProjectsPage() {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [initial] = useState(getCachedProjects);
+  const [projects, setProjects] = useState(initial || []);
+  const [loading, setLoading] = useState(!initial);
   const [error, setError] = useState("");
   const [selectedProject, setSelectedProject] = useState(null);
   const [playingIndices, setPlayingIndices] = useState(new Set());
@@ -53,20 +54,16 @@ function ProjectsPage() {
   useEffect(() => { loadProjects(); }, []);
 
   async function loadProjects() {
-    try {
-      setLoading(true);
-      setError("");
-      // The backend already returns projects sorted by the manual
-      // `order` field you control from the admin panel's up/down
-      // arrows — no client-side re-sorting needed here.
-      const data = await fetchProjects();
-      setProjects(data || []);
-    } catch (err) {
-      setError(err.message || "Failed to load projects.");
-    } finally {
-      setLoading(false);
-    }
+  try {
+    setError("");
+    const data = await fetchProjects();
+    setProjects(data || []);
+  } catch (err) {
+    if (!initial) setError(err.message || "Failed to load projects.");
+  } finally {
+    setLoading(false);
   }
+}
 
   // ── Measure actual rendered column count ────────────────
   const measureColumns = useCallback(() => {
@@ -147,7 +144,8 @@ function ProjectsPage() {
           {loading ? (
             <div className="projects-loading">
               <span /><span /><span />
-            </div>
+                <p className="status-text">Starting the server, one moment.</p>
+                </div>
           ) : error ? (
             <p className="status-text status-error">{error}</p>
           ) : projects.length === 0 ? (
